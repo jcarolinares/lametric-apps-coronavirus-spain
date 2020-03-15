@@ -17,5 +17,7 @@ jcarolinares@gmail.com
 
 * Create a "config" file in this folder with the following data:
 
+
 [lametric]
+
 token = '<your_token>'

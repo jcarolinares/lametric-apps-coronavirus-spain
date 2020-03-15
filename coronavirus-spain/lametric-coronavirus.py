@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 '''
 A simple coronavirus APP for my Lametric time device
@@ -14,24 +13,31 @@ jcarolinares@gmail.com
 '''
 
 import requests
+import os
 import json
 import pandas as pd
+import configparser
 
 # Enviroment variables
-lametric_app_token = '<token>'
 
+config = configparser.ConfigParser()
+config.read([os.path.expanduser('~/lametric-apps/coronavirus-spain/config')]) # Put your config file here or chage the path
+print(config.sections())
+lametric_app_token = config.get('lametric', 'token')
 
 # Download of the data
 r = requests.get(
     'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/nacional_covid19.csv')
 
-file = open("data.csv", 'w')
-file.write(r.text)
+#print(r.text)
+
+file = open("data.csv", 'wb')
+file.write(r.text.encode('utf-8'))
 file.close()
 
-data = pd.read_csv("data.csv")
-print(data["Casos"].max())  # It take the maximum value, by definition, the most updated one
-print(int(data["Fallecimientos"].max()))
+data = pd.read_csv("data.csv",encoding ='utf-8')
+print(data["casos"].max())  # It take the maximum value, by definition, the most updated one
+print(int(data["fallecimientos"].max()))
 
 # Lametric post request
 headers = {
@@ -45,11 +51,11 @@ data_request = {"frames": [
         "icon": "i579"
     },
     {
-        "text": str(data["Casos"].max()),
+        "text": str(data["casos"].max()),
         "icon": "i35318"
     },
     {
-        "text": str(int(data["Fallecimientos"].max())),
+        "text": str(int(data["fallecimientos"].max())),
         "icon": "a35723"
     }
 ]}

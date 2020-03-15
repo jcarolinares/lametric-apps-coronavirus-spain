@@ -28,7 +28,6 @@ lametric_app_token = config.get('lametric', 'token')
 # Download of the data
 r = requests.get(
     'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/nacional_covid19.csv')
-
 #print(r.text)
 
 file = open("data.csv", 'wb')
@@ -38,6 +37,19 @@ file.close()
 data = pd.read_csv("data.csv",encoding ='utf-8')
 print(data["casos"].max())  # It take the maximum value, by definition, the most updated one
 print(int(data["fallecimientos"].max()))
+print(str(int(data["altas"].max())))
+
+list_cases = []
+for x in data["casos"]: # Little hack to easy convert numpy int64 to int
+    list_cases.append(x)
+
+relative_cases = []
+for i in range(len(list_cases)):
+    if (i!=0):
+        relative_cases.append(list_cases[i]-list_cases[i-1])
+    else:
+        relative_cases.append(list_cases[i])
+print(relative_cases[-10:])
 
 # Lametric post request
 headers = {
@@ -57,8 +69,16 @@ data_request = {"frames": [
     {
         "text": str(int(data["fallecimientos"].max())),
         "icon": "a35723"
+    },
+    {
+        "text": str(int(data["altas"].max())),
+        "icon": "i35319"
+    },
+    {
+        "index": 4,
+        "chartData": relative_cases[-10:]
     }
 ]}
-response = requests.post('https://developer.lametric.com/api/v1/dev/widget/update/com.lametric.37cb93122b1d49ab1d630f5dfe23bdc1/2',
+response = requests.post('https://developer.lametric.com/api/v1/dev/widget/update/com.lametric.37cb93122b1d49ab1d630f5dfe23bdc1/5',
                          headers=headers, data=json.dumps(data_request))
 print(response)

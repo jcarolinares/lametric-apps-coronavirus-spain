@@ -35,12 +35,13 @@ file.write(r.text.encode('utf-8'))
 file.close()
 
 data = pd.read_csv("data.csv",encoding ='utf-8')
-print(data["casos"].max())  # It take the maximum value, by definition, the most updated one
+print(data)
+print(data["casos_total"].max())  # It take the maximum value, by definition, the most updated one
 print(int(data["fallecimientos"].max()))
 print(str(int(data["altas"].max())))
 
 list_cases = []
-for x in data["casos"]: # Little hack to easy convert numpy int64 to int
+for x in data["casos_total"]: # Little hack to easy convert numpy int64 to int
     list_cases.append(x)
 
 relative_cases = []
@@ -85,7 +86,7 @@ data_request = {"frames": [
         "icon": "i579"
     },
     {
-        "text": str(data["casos"].max()),
+        "text": str(data["casos_total"].max()),
         "icon": "i35318"
     },
     {

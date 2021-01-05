@@ -21,9 +21,10 @@ import configparser
 # Enviroment variables
 
 config = configparser.ConfigParser()
-config.read([os.path.expanduser('~/lametric-apps/coronavirus-spain/config')]) # Put your config file here or chage the path
+config.read([os.path.expanduser('config')]) # Put your config file here or chage the path
 print(config.sections())
 lametric_app_token = config.get('lametric', 'token')
+#print(config.get('lametric', 'token'))
 
 # Download the national data
 r = requests.get(
@@ -36,13 +37,19 @@ file.close()
 
 data = pd.read_csv("data.csv",encoding ='utf-8')
 print(data)
-print(data["casos_total"].max())  # It take the maximum value, by definition, the most updated one
+print("datos")
+print(data["casos_total"].max())  # It takes the maximum value, by definition, the most updated one
 print(int(data["fallecimientos"].max()))
 print(str(int(data["altas"].max())))
 
 list_cases = []
 for x in data["casos_total"]: # Little hack to easy convert numpy int64 to int
-    list_cases.append(x)
+    if pd.isna(x):
+        list_cases.append(0)
+        print(x)
+    else:
+        list_cases.append(x)
+        print(x)
 
 relative_cases = []
 for i in range(len(list_cases)):
@@ -64,7 +71,7 @@ file.close()
 data_regional = pd.read_csv("data_regional.csv",encoding ='utf-8').loc[:,:]
 # print(data_regional)
 data_madrid = data_regional.loc[13,:]
-print(data_madrid)  # It take the maximum value, by definition, the most updated one
+print(data_madrid)  # It takes the maximum value, by definition, the most updated one
 print(data_madrid[-1])
 # print(int(data["fallecimientos"].max()))
 # print(str(int(data["altas"].max())))
@@ -83,19 +90,23 @@ headers = {
 data_request = {"frames": [
     {
         "text": "SPAIN",
-        "icon": "i579"
+        "icon": "i579",
+        "index": 0
     },
     {
         "text": str(data["casos_total"].max()),
-        "icon": "i35318"
+        "icon": "i35318",
+        "index": 1
     },
     {
         "text": str(int(data["fallecimientos"].max())),
-        "icon": "a35723"
+        "icon": "a35723",
+        "index": 2
     },
     {
         "text": str(int(data["altas"].max())),
-        "icon": "i35319"
+        "icon": "i35319",
+        "index": 3
     },
     {
         "index": 4,

@@ -15,9 +15,10 @@ jcarolinares@gmail.com
 
 * You will need to create your own lametric time app and get the token at [https://developer.lametric.com](https://developer.lametric.com)
 
-* Create a "config" file in this folder with the following data:
+* Create a "config" file in this folder with the following data that you will find in your lametric developer page:
 
 
 [lametric]
 
 token = '<your_token>'
+push_url <your_url_not_quotations>

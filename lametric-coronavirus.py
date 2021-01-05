@@ -22,9 +22,8 @@ import configparser
 
 config = configparser.ConfigParser()
 config.read([os.path.expanduser('config')]) # Put your config file here or chage the path
-print(config.sections())
 lametric_app_token = config.get('lametric', 'token')
-#print(config.get('lametric', 'token'))
+lametric_push_url = config.get('lametric', 'push_url')
 
 # Download the national data
 r = requests.get(
@@ -73,13 +72,26 @@ data_regional = pd.read_csv("data_regional.csv",encoding ='utf-8').loc[:,:]
 data_madrid = data_regional.loc[13,:]
 print(data_madrid)  # It takes the maximum value, by definition, the most updated one
 print(data_madrid[-1])
-# print(int(data["fallecimientos"].max()))
-# print(str(int(data["altas"].max())))
 
-# list_cases = []
-# for x in data["casos"]: # Little hack to easy convert numpy int64 to int
-#     list_cases.append(x)
 
+# Download Spanish vaccination by region
+# https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_vacunas.csv
+r = requests.get(
+    'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_vacunas.csv')
+print(r.text)
+
+file = open("ccaa_vacunas.csv", 'wb')
+file.write(r.text.encode('utf-8'))
+file.close()
+
+data_vaccines = pd.read_csv("ccaa_vacunas.csv",encoding ='utf-8', sep=";")
+
+print(data_vaccines)
+data_vaccines.set_index("CCAA", inplace=True)
+vaccines_number= data_vaccines.loc['Madrid','Dosis administradas']
+print(vaccines_number)
+vaccines_percentage = data_vaccines.loc['Madrid','% sobre entregadas']
+print(vaccines_percentage)
 
 # Lametric post request
 headers = {
@@ -94,7 +106,7 @@ data_request = {"frames": [
         "index": 0
     },
     {
-        "text": str(data["casos_total"].max()),
+        "text": str(int(data["casos_total"].max())),
         "icon": "i35318",
         "index": 1
     },
@@ -109,20 +121,26 @@ data_request = {"frames": [
         "index": 3
     },
     {
-        "index": 4,
-        "chartData": relative_cases[-10:]
+    "text": "MADRID",
+       "icon": "i933",
+       "index": 4
     },
     {
-    "text": "MADRID",
+       "text": str(int(data_madrid[-1])),
        "icon": "i933",
        "index": 5
     },
     {
-       "text": str(data_madrid[-1]),
-       "icon": "i933",
-       "index": 6
+        "text": vaccines_number,
+        "icon": "i22570",
+        "index": 6
+    },
+    {
+        "text": vaccines_percentage,
+        "icon": 'null',
+        "index": 7
     }
 ]}
-response = requests.post('https://developer.lametric.com/api/v1/dev/widget/update/com.lametric.37cb93122b1d49ab1d630f5dfe23bdc1/7',
+response = requests.post(lametric_push_url,
                          headers=headers, data=json.dumps(data_request))
 print(response)

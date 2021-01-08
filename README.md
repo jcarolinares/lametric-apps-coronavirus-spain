@@ -21,4 +21,5 @@ jcarolinares@gmail.com
 [lametric]
 
 token = '<your_token>'
+
 push_url <your_url_not_quotations>

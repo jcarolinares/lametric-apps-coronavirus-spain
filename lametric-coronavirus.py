@@ -24,6 +24,7 @@ config = configparser.ConfigParser()
 config.read([os.path.expanduser('config')]) # Put your config file here or chage the path
 lametric_app_token = config.get('lametric', 'token')
 lametric_push_url = config.get('lametric', 'push_url')
+region = "Madrid"
 
 # Download the national data
 r = requests.get(
@@ -35,6 +36,7 @@ file.write(r.text.encode('utf-8'))
 file.close()
 
 data = pd.read_csv("data.csv",encoding ='utf-8')
+print("SPAIN DATA")
 print(data)
 print("datos")
 print(data["casos_total"].max())  # It takes the maximum value, by definition, the most updated one
@@ -60,17 +62,21 @@ print(relative_cases[-10:])
 
 # Download the regional data
 r = requests.get(
-    'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_covid19_casos.csv')
+    'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_covid19_datos_sanidad_nueva_serie.csv')
 #print(r.text)
 
 file = open("data_regional.csv", 'wb')
 file.write(r.text.encode('utf-8'))
 file.close()
 
-data_regional = pd.read_csv("data_regional.csv",encoding ='utf-8').loc[:,:]
-# print(data_regional)
-data_madrid = data_regional.loc[13,:]
-print(data_madrid)  # It takes the maximum value, by definition, the most updated one
+data_regional = pd.read_csv("data_regional.csv",encoding ='utf-8') #.loc[:,:]
+print("REGIONAL DATA")
+print(data_regional)
+data_regional.set_index("CCAA", inplace=True)
+data_madrid = data_regional.loc[region,'Casos']
+print("test")
+print("\n"+str(data_madrid))  # It takes the maximum value, by definition, the most updated one
+print("Last value")
 print(data_madrid[-1])
 
 
@@ -78,19 +84,21 @@ print(data_madrid[-1])
 # https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_vacunas.csv
 r = requests.get(
     'https://raw.githubusercontent.com/datadista/datasets/master/COVID%2019/ccaa_vacunas.csv')
-print(r.text)
+#print(r.text)
 
 file = open("ccaa_vacunas.csv", 'wb')
 file.write(r.text.encode('utf-8'))
 file.close()
 
-data_vaccines = pd.read_csv("ccaa_vacunas.csv",encoding ='utf-8', sep=";")
-
+data_vaccines = pd.read_csv("ccaa_vacunas.csv",encoding ='utf-8', sep=",")
+print("REGIONAL VACCINATION DATA")
 print(data_vaccines)
 data_vaccines.set_index("CCAA", inplace=True)
-vaccines_number= data_vaccines.loc['Madrid','Dosis administradas']
+
+vaccines_number= data_vaccines.loc[region,'Dosis administradas']
 print(vaccines_number)
-vaccines_percentage = data_vaccines.loc['Madrid','% sobre entregadas']
+
+vaccines_percentage = data_vaccines.loc[region,'Porcentaje sobre entregadas']
 print(vaccines_percentage)
 
 # Lametric post request
@@ -131,12 +139,12 @@ data_request = {"frames": [
        "index": 5
     },
     {
-        "text": vaccines_number,
+        "text": vaccines_number[-1],
         "icon": "i22570",
         "index": 6
     },
     {
-        "text": vaccines_percentage,
+        "text": vaccines_percentage[-1],
         "icon": 'null',
         "index": 7
     }
